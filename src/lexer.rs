@@ -1,5 +1,11 @@
-pub fn lexer(data: &String) {
+use crate::token::{
+    Token,
+    TokenKind,
+};
+
+pub fn lexer(data: &String) -> Vec<Token> {
     let mut pos = 0;
+    let mut tokens: Vec<Token> = Vec::new();
 
     while pos < data.len() {
         let c = data.chars().nth(pos).unwrap();
@@ -8,35 +14,36 @@ pub fn lexer(data: &String) {
             pos += 1;
             continue;
         }
-
-        if c.is_ascii_alphabetic() {
+        else if c.is_ascii_alphabetic() {
             let string = get_string(data, pos);
             pos += string.len();
-            println!("STRING: {}", string);
+            add_token(&mut tokens, TokenKind::String, string);
             continue;
         }
-
-        if c.is_ascii_digit() {
+        else if c.is_ascii_digit() {
             let number = get_number(data, pos);
             pos += number.len();
-            println!("NUMBER: {}", number);
+            add_token(&mut tokens, TokenKind::Number, number);
             continue;
         }
-
-        match c {
-            '+' => println!("PLUS"),
-            '-' => println!("MINUS"),
-            '*' => println!("STAR"),
-            '/' => println!("SLASH"),
-            '(' => println!("LPAREN"),
-            ')' => println!("RPAREN"),
-            '=' => println!("EQUAL"),
-            ';' => println!("SEMICOLON"),
-            _ => println!("UNKNOWN"),
+        else {            
+            match c {
+                '+' => add_token(&mut tokens, TokenKind::Plus, c.to_string()),
+                '-' => add_token(&mut tokens, TokenKind::Minus, c.to_string()),
+                '*' => add_token(&mut tokens, TokenKind::Multiply, c.to_string()),
+                '/' => add_token(&mut tokens, TokenKind::Slash, c.to_string()),
+                '(' => add_token(&mut tokens, TokenKind::LParen, c.to_string()),
+                ')' => add_token(&mut tokens, TokenKind::RParen, c.to_string()),
+                '=' => add_token(&mut tokens, TokenKind::Equal, c.to_string()),
+                ';' => add_token(&mut tokens, TokenKind::Semicolon, c.to_string()),
+                _ => add_token(&mut tokens, TokenKind::Unknown, c.to_string()),
+            }
         }
 
         pos += 1;
     }
+
+    return tokens;
 }
 
 fn get_string(data: &String, pos: usize) -> String {
@@ -69,4 +76,8 @@ fn get_number(data: &String, pos: usize) -> String {
     }
 
     number
+}
+
+fn add_token(tokens: &mut Vec<Token>, kind: TokenKind, c: String) {
+    tokens.push(Token::new(kind, c));
 }
